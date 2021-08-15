@@ -1,6 +1,7 @@
 {
     "name": "waldit/validator",
     "description": "The validator of PHP (Contribution: JoJo)",
+    "license": "GPL-3.0-only",
     "require-dev": {
         "phpunit/phpunit": "^9.5"
     },
@@ -9,7 +10,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Waldit\\" : "src/waldit"
+            "Waldit\\Validator\\" : "src/waldit"
         }
     },
     "autoload-dev": {
