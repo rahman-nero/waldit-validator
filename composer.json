@@ -1,4 +1,6 @@
 {
+    "name": "waldit/validator",
+    "description": "The validator of PHP (Contribution: JoJo)",
     "require-dev": {
         "phpunit/phpunit": "^9.5"
     },
@@ -10,7 +12,15 @@
             "Waldit\\" : "src/waldit"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\" : "/tests"
+        }
+    },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "test" : "vendor/bin/phpunit"
     }
 }
