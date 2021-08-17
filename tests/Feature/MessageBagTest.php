@@ -1,10 +1,10 @@
 <?php
 
-namespace tests;
+namespace tests\Feature;
 
-use Waldit\Exception\MessageNotFoundException;
-use Waldit\Exception\OverWriteMessageException;
-use Waldit\MessageBag;
+use Waldit\Validator\Exception\MessageNotFoundException;
+use Waldit\Validator\Exception\OverWriteMessageException;
+use Waldit\Validator\MessageBag;
 use PHPUnit\Framework\TestCase;
 
 class MessageBagTest extends TestCase
@@ -29,8 +29,8 @@ class MessageBagTest extends TestCase
         $this->messageBag->getMessage('oasjpf');
     }
 
-    public function testAllowOverWriteMessage() {
-        $this->messageBag->onOverWriteMessages(true);
+    public function testAllowOverwriteMessage() {
+        $this->messageBag->onOverwriteMessages(true);
         #
         $this->messageBag->setMessage('name', 'Hehe e boy');
         $message1 = $this->messageBag->getMessage('name');
@@ -45,22 +45,18 @@ class MessageBagTest extends TestCase
 
     public function testNotAllowOverWriteMessage() {
         $this->expectException(OverWriteMessageException::class);
-        $this->messageBag->onOverWriteMessages(false);
-        #
+        $this->messageBag->onOverwriteMessages(false);
+        #s
         $this->messageBag->setMessage('name', 'Hehe e boy');
-        $message1 = $this->messageBag->getMessage('name');
         #
         $this->messageBag->setMessage('name', 'This is not a boy');
-        $message2 = $this->messageBag->getMessage('name');
-
-        self::assertEquals($message1, 'Hehe e boy');
-        self::assertEquals($message2, 'This is not a boy');
     }
 
 
     public function messagesProvider() {
         return [
-            ['name', 'Удалите ваш тупой код'],
+            ['name', 'Delete your code'],
         ];
     }
+
 }

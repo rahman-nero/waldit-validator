@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Waldit\Exception;
+namespace Waldit\Validator\Exception;
 
 
 final class OverWriteMessageException extends \Exception

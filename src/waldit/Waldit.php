@@ -1,20 +1,25 @@
 <?php
-namespace Waldit;
 
+namespace Waldit\Validator;
+
+
+use Waldit\Validator\Contracts\LanguageInterface;
 
 final class Waldit
 {
-    private $rules;
-    private $language;
-    private $stopIfError;
+    private LanguageInterface $language;
+    private MessageBag $messageBag;
+
+    private array $rules;
+    private bool $stopOnFirstError;
 
 
-    public function __construct(array $rules = [], $language = 'en', bool $stopIfError = false)
+    public function __construct(MessageBag $messageBag, LanguageInterface $language)
     {
-        $this->rules = $rules;
+        $this->messageBag = $messageBag;
         $this->language = $language;
-        $this->stopIfError = $stopIfError;
     }
+
 
     public function getRules(): array
     {
@@ -26,9 +31,14 @@ final class Waldit
         $this->rules = $rules;
     }
 
-    public function getStopIfError(): bool
+    public function getStopOnFirstError(): bool
     {
-        return $this->stopIfError;
+        return $this->stopOnFirstError;
+    }
+
+    public function setStopOnFirstError(bool $val)
+    {
+        $this->stopOnFirstError = $val;
     }
 
     public function getLanguage()

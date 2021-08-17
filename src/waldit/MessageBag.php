@@ -1,16 +1,16 @@
 <?php
 
 
-namespace Waldit;
+namespace Waldit\Validator;
 
 
-use Waldit\Exception\MessageNotFoundException;
-use Waldit\Exception\OverWriteMessageException;
+use Waldit\Validator\Exception\MessageNotFoundException;
+use Waldit\Validator\Exception\OverWriteMessageException;
 
 final class MessageBag
 {
     private array $messages = [];
-    private bool $onOverWrite = false;
+    private bool $onOverwrite = false;
 
     public function __construct() {
 
@@ -18,7 +18,7 @@ final class MessageBag
 
     public function setMessage($key, $value) {
         if (array_key_exists($key, $this->messages)
-            && $this->getOnOverWriteValue() !== true) {
+            && $this->getOnOverwriteValue() !== true) {
             throw new OverWriteMessageException();
         }
 
@@ -32,15 +32,13 @@ final class MessageBag
         return $this->messages[$key];
     }
 
-    public function onOverWriteMessages(bool $value): void
+    public function onOverwriteMessages(bool $value): void
     {
-        $this->onOverWrite = $value;
+        $this->onOverwrite = $value;
     }
 
-    public function getOnOverWriteValue(): bool
+    public function getOnOverwriteValue(): bool
     {
-        return $this->onOverWrite;
+        return $this->onOverwrite;
     }
-
-
 }
