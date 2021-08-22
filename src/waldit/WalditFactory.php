@@ -15,13 +15,13 @@ final class WalditFactory
         $this->language = new Language();
     }
 
-    public function make(array $rules = [], $language = 'ru', $stopIfError = false) {
+    public function make(array $rules = [], $language = 'ru', $stopOnFirstIfError = false) {
         # Установка языка
         $this->language->setLanguage($language);
 
         $waldit = new Waldit($this->messageBag, $this->language);
         $waldit->setRules($rules);
-        $waldit->setStopOnFirstError($stopIfError);
+        $waldit->setStopOnFirstError($stopOnFirstIfError);
 
         return $waldit;
     }

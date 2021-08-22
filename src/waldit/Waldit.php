@@ -21,6 +21,50 @@ final class Waldit
     }
 
 
+    public function validate($data)
+    {
+        foreach ($data as $inputName => $valueInput) {
+            if (!$this->hasRule($inputName)) continue;
+            foreach ($this->rules as $ruleName => $ruleValue) {
+                $explodedRule = $this->recursiveParse($ruleValue);
+
+                $this->callValidateMethod($explodedRule);
+            }
+        }
+
+    }
+
+    protected function recursiveParse(string $rule)
+    {
+        $explodedRule = explode('|', $rule);
+
+        $explodedRule = array_map(function ($elem) {
+            $result = preg_match_all("#^(.*):(.*)$#i", $elem, $matches);
+
+            if ($result === 1) {
+                $methodName = $matches[1];
+                $params = $matches[2];
+            } elseif ($result === false) {
+                throw new \Exception('Не смогли распарсить правило');
+            }
+
+            return $elem;
+        }, $explodedRule);
+
+        var_dump($explodedRule);
+        return $explodedRule;
+    }
+
+    private function callValidateMethod(array $explodedRule)
+    {
+
+    }
+
+    protected function hasRule($ruleName): bool
+    {
+        return array_key_exists($ruleName, $this->rules);
+    }
+
     public function getRules(): array
     {
         return $this->rules;
@@ -45,4 +89,6 @@ final class Waldit
     {
         return $this->language;
     }
+
+
 }
