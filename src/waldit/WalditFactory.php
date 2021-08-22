@@ -6,12 +6,10 @@ namespace Waldit\Validator;
 
 final class WalditFactory
 {
-    private $messageBag;
     private $language;
 
     public function __construct()
     {
-        $this->messageBag = new MessageBag();
         $this->language = new Language();
     }
 
@@ -19,7 +17,9 @@ final class WalditFactory
         # Установка языка
         $this->language->setLanguage($language);
 
-        $waldit = new Waldit($this->messageBag, $this->language);
+        $messageBag = new MessageBag($this->language);
+
+        $waldit = new Waldit($messageBag, $this->language);
         $waldit->setRules($rules);
         $waldit->setStopOnFirstError($stopOnFirstIfError);
 

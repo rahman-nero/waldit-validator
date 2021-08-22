@@ -4,6 +4,7 @@
 namespace Waldit\Validator;
 
 
+use Waldit\Validator\Contracts\LanguageInterface;
 use Waldit\Validator\Exception\MessageNotFoundException;
 use Waldit\Validator\Exception\OverWriteMessageException;
 
@@ -12,8 +13,8 @@ final class MessageBag
     private array $messages = [];
     private bool $onOverwrite = false;
 
-    public function __construct() {
-
+    public function __construct(LanguageInterface $language) {
+        $this->defaultMessages($language->getLang());
     }
 
     public function setMessage($key, $value) {
@@ -40,5 +41,12 @@ final class MessageBag
     public function getOnOverwriteValue(): bool
     {
         return $this->onOverwrite;
+    }
+
+    public function defaultMessages(array $language)
+    {
+        foreach($language as $key => $value) {
+            $this->setMessage($key, $value);
+        }
     }
 }

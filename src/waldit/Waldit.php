@@ -4,6 +4,7 @@ namespace Waldit\Validator;
 
 
 use Waldit\Validator\Contracts\LanguageInterface;
+use Waldit\Validator\Exception\NotExistsValidatorMethodException;
 
 final class Waldit
 {
@@ -12,6 +13,7 @@ final class Waldit
 
     private array $rules;
     private bool $stopOnFirstError;
+    private $currentElemValidation;
 
 
     public function __construct(MessageBag $messageBag, LanguageInterface $language)
@@ -26,9 +28,12 @@ final class Waldit
         foreach ($data as $inputName => $valueInput) {
             if (!$this->hasRule($inputName)) continue;
             foreach ($this->rules as $ruleName => $ruleValue) {
-                $explodedRule = $this->recursiveParse($ruleValue);
+                $parsedRule = $this->recursiveParse($ruleValue);
+                $this->currentElemValidation = $ruleName;
 
-                $this->callValidateMethod($explodedRule);
+                if(!$this->callValidateMethod($parsedRule, $valueInput)) {
+                    return;
+                }
             }
         }
 
@@ -38,26 +43,62 @@ final class Waldit
     {
         $explodedRule = explode('|', $rule);
 
-        $explodedRule = array_map(function ($elem) {
+        $parsedRule = array_map(function ($elem) {
             $result = preg_match_all("#^(.*):(.*)$#i", $elem, $matches);
 
             if ($result === 1) {
-                $methodName = $matches[1];
+                $methodName = $matches[1][0];
                 $params = $matches[2];
+            }elseif ($result === 0) {
+                $methodName = $elem;
+                $params = null;
             } elseif ($result === false) {
                 throw new \Exception('Не смогли распарсить правило');
             }
 
-            return $elem;
+            return ['method' => $methodName, 'params' => $params];
         }, $explodedRule);
 
-        var_dump($explodedRule);
-        return $explodedRule;
+        return $parsedRule;
     }
 
-    private function callValidateMethod(array $explodedRule)
+    private function callValidateMethod(array $parsedRules, $value)
     {
+        foreach ($parsedRules as $parsedElem) {
+            $method = sprintf("%sValidate", $parsedElem['method']);
+            $params = $parsedElem['params'];
+            if (!method_exists($this, $method)) {
+                throw new NotExistsValidatorMethodException($method);
+            }
 
+            if (!is_null($params)) {
+                return $this->{$method}($value, ...$params);
+            }
+
+            return $this->{$method}($value);
+        }
+
+    }
+
+    private function minValidate($value, $count): bool
+    {
+        if(is_string($value)) {
+            $result = mb_strlen($value) > $count;
+        }
+
+        if (is_int($value)) {
+            $result = $value > $count;
+        }
+
+        if($result === false) {
+            $this->messageBag->setMessage(
+                $this->currentElemValidation,
+                $this->messageBag->getMessage('min')
+            );
+            return false;
+        }
+
+        return true;
     }
 
     protected function hasRule($ruleName): bool
