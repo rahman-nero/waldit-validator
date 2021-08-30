@@ -4,6 +4,8 @@ namespace Waldit\Validator;
 
 
 use Waldit\Validator\Contracts\LanguageInterface;
+use Waldit\Validator\Contracts\RuleInterface;
+use Waldit\Validator\Exception\InvalidRuleException;
 use Waldit\Validator\Exception\NotExistsValidatorMethodException;
 
 final class Waldit
@@ -36,7 +38,7 @@ final class Waldit
                 $this->currentElemValidation = $ruleName;
 
                 # Вызываем метод для обработки, с передачей правила
-                if(!$this->callValidateMethod($parsedRule, $valueInput)) {
+                if (!$this->callValidateMethod($parsedRule, $valueInput)) {
                     return false;
                 }
             }
@@ -45,22 +47,29 @@ final class Waldit
         return true;
     }
 
-    public function getErrors() {
+    public function getErrors()
+    {
         return $this->messageBag->getBagErrors();
     }
 
-    protected function recursiveParse(string $rule): array
+    protected function recursiveParse($rule): array
     {
+        if (is_object($rule)) {
+            return $this->parseObjectRule($rule);
+        }
+
         # Разделяем правила: "required|min:3|max:4" и т.д
         $explodedRule = explode('|', $rule);
 
         $parsedRule = array_map(function ($elem) {
+
+
             $result = preg_match_all("#^(.*):(.*)$#i", $elem, $matches);
 
             if ($result === 1) {
                 $methodName = $matches[1][0];
                 $params = $matches[2];
-            }elseif ($result === 0) {
+            } elseif ($result === 0) {
                 $methodName = $elem;
                 $params = null;
             } elseif ($result === false) {
@@ -73,9 +82,18 @@ final class Waldit
         return $parsedRule;
     }
 
+    private function parseObjectRule(object $rule): array
+    {
+        if (!($rule instanceof RuleInterface)) {
+            throw new InvalidRuleException();
+        }
+        return [];
+    }
+
     private function callValidateMethod(array $parsedRules, $value)
     {
         foreach ($parsedRules as $parsedElem) {
+
             $method = sprintf("%sValidate", $parsedElem['method']);
             $params = $parsedElem['params'];
             if (!method_exists($this, $method)) {
@@ -93,7 +111,7 @@ final class Waldit
 
     private function minValidate($value, $count): bool
     {
-        if(is_string($value)) {
+        if (is_string($value)) {
             $result = mb_strlen($value) > $count;
         }
 
@@ -101,7 +119,7 @@ final class Waldit
             $result = $value > $count;
         }
 
-        if($result === false) {
+        if ($result === false) {
             $this->messageBag->setError($this->currentElemValidation, 'min');
             return false;
         }

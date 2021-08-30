@@ -12,7 +12,7 @@ $rules = [
 ];
 
 $data = [
-    'title' => "у"
+    'title' => "asdasdу"
 ];
 
 $messages = [
@@ -31,5 +31,5 @@ try {
     }
 
 } catch (NotExistsValidatorMethodException $e) {
-    echo $e->getMethodName();
+    echo sprintf("Вызов метода валидатора прошел не успешно, %s", $e->getMethodName());
 }
