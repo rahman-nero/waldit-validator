@@ -4,6 +4,7 @@ namespace tests\Feature;
 
 use Waldit\Validator\Exception\MessageNotFoundException;
 use Waldit\Validator\Exception\OverWriteMessageException;
+use Waldit\Validator\Language;
 use Waldit\Validator\MessageBag;
 use PHPUnit\Framework\TestCase;
 
@@ -13,7 +14,9 @@ class MessageBagTest extends TestCase
 
     public function setUp(): void
     {
-        $this->messageBag = new MessageBag();
+        $language = new Language();
+        $language->setLanguage('en');
+        $this->messageBag = new MessageBag($language);
     }
 
     /**
@@ -29,28 +32,6 @@ class MessageBagTest extends TestCase
         $this->messageBag->getMessage('oasjpf');
     }
 
-    public function testAllowOverwriteMessage() {
-        $this->messageBag->onOverwriteMessages(true);
-        #
-        $this->messageBag->setMessage('name', 'Hehe e boy');
-        $message1 = $this->messageBag->getMessage('name');
-        #
-        $this->messageBag->setMessage('name', 'This is not a boy');
-        $message2 = $this->messageBag->getMessage('name');
-
-        self::assertEquals($message1, 'Hehe e boy');
-        self::assertEquals($message2, 'This is not a boy');
-    }
-
-
-    public function testNotAllowOverWriteMessage() {
-        $this->expectException(OverWriteMessageException::class);
-        $this->messageBag->onOverwriteMessages(false);
-        #s
-        $this->messageBag->setMessage('name', 'Hehe e boy');
-        #
-        $this->messageBag->setMessage('name', 'This is not a boy');
-    }
 
 
     public function messagesProvider() {

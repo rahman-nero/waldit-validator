@@ -5,37 +5,56 @@ namespace Waldit\Validator;
 
 
 use Waldit\Validator\Contracts\LanguageInterface;
+use Waldit\Validator\Exception\InvalidLanguageTypeFileException;
 use Waldit\Validator\Exception\LanguageNotFoundException;
 
 final class Language implements LanguageInterface
 {
-    const DEFAULT_DIRECTORY_AUTOLOAD = "/support/languages";
     private string $currentLanguageName;
-    private array $loadedLanguage;
+    private array  $loadedLanguage = [];
+    private string $default_language_autoload_path;
 
-    public function __construct()
+    public function __construct(string $language = 'en', string $default_language_autoload_path = "/support/languages")
     {
+        $this->setLanguageAutoloadPath($default_language_autoload_path);
+        $this->setLanguage($language);
     }
 
     public function setLanguage($language): void
     {
-        $this->loadLanguage($language);
-        $this->currentLanguage = $language;
+        if ($this->loadLanguage($language)) {
+            $this->currentLanguageName = $language;
+        }
     }
 
-    public function getLang(): array
+    public function getLanguageList(): array
     {
         return $this->loadedLanguage;
     }
 
-    private function loadLanguage($language)
+    public function getCurrentLanguage()
     {
-        $languagePath = sprintf('%s/%s.php', dirname(__DIR__) . self::DEFAULT_DIRECTORY_AUTOLOAD, $language);
+        return $this->currentLanguageName;
+    }
 
-        var_dump($languagePath);
+    private function loadLanguage($language): bool
+    {
+        $languagePath = sprintf('%s/%s.php', dirname(__DIR__) . $this->default_language_autoload_path, $language);
         if (!file_exists($languagePath)) {
             throw new LanguageNotFoundException($language);
         }
-        $this->loadedLanguage = require_once $languagePath;
+
+        $downloadedArray = require $languagePath;
+        if (!is_array($downloadedArray)) {
+            throw new InvalidLanguageTypeFileException();
+        }
+
+        $this->loadedLanguage = $downloadedArray;
+        return true;
+    }
+
+    public function setLanguageAutoloadPath($path)
+    {
+        $this->default_language_autoload_path = $path;
     }
 }

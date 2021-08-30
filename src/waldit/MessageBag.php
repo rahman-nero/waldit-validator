@@ -11,42 +11,31 @@ use Waldit\Validator\Exception\OverWriteMessageException;
 final class MessageBag
 {
     private array $messages = [];
-    private bool $onOverwrite = false;
+    private LanguageInterface $language;
 
-    public function __construct(LanguageInterface $language) {
-        $this->defaultMessages($language->getLang());
+    public function __construct(LanguageInterface $language)
+    {
+        $this->language = $language;
+        $this->fillMessages();
     }
 
-    public function setMessage($key, $value) {
-        if (array_key_exists($key, $this->messages)
-            && $this->getOnOverwriteValue() !== true) {
-            throw new OverWriteMessageException();
-        }
-
+    public function setMessage($key, $value)
+    {
         $this->messages[$key] = $value;
     }
 
-    public function getMessage($key) {
+    public function getMessage($key)
+    {
         if (!array_key_exists($key, $this->messages)) {
             throw new MessageNotFoundException();
         }
         return $this->messages[$key];
     }
 
-    public function onOverwriteMessages(bool $value): void
+    private function fillMessages()
     {
-        $this->onOverwrite = $value;
-    }
-
-    public function getOnOverwriteValue(): bool
-    {
-        return $this->onOverwrite;
-    }
-
-    public function defaultMessages(array $language)
-    {
-        foreach($language as $key => $value) {
-            $this->setMessage($key, $value);
+        foreach ($this->language->getLanguageList() as $messageKey => $messageValue) {
+            $this->setMessage($messageKey, $messageValue);
         }
     }
 }

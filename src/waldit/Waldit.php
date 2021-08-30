@@ -22,15 +22,20 @@ final class Waldit
         $this->language = $language;
     }
 
-
     public function validate($data)
     {
         foreach ($data as $inputName => $valueInput) {
+            # Проверка есть ли такое правило
             if (!$this->hasRule($inputName)) continue;
+            # Перебираем правила и применяем по очередной
             foreach ($this->rules as $ruleName => $ruleValue) {
+                # Сперва парсим правило
                 $parsedRule = $this->recursiveParse($ruleValue);
+
+                # Указываем какое правило обрабатываем на данный момент
                 $this->currentElemValidation = $ruleName;
 
+                # Вызываем метод для обработки, с передачей правила
                 if(!$this->callValidateMethod($parsedRule, $valueInput)) {
                     return;
                 }
@@ -39,8 +44,13 @@ final class Waldit
 
     }
 
-    protected function recursiveParse(string $rule)
+    public function getErrors() {
+        $this->messageBag->getMessages();
+    }
+
+    protected function recursiveParse(string $rule): array
     {
+        # Разделяем правила: "required|min:3|max:4" и т.д
         $explodedRule = explode('|', $rule);
 
         $parsedRule = array_map(function ($elem) {
@@ -101,7 +111,14 @@ final class Waldit
         return true;
     }
 
-    protected function hasRule($ruleName): bool
+    public function setMessages(array $arrayMessages): void
+    {
+        foreach ($arrayMessages as $keyRule => $message) {
+            $this->messageBag->setMessage($keyRule, $message);
+        }
+    }
+
+    public function hasRule($ruleName): bool
     {
         return array_key_exists($ruleName, $this->rules);
     }
@@ -130,6 +147,8 @@ final class Waldit
     {
         return $this->language;
     }
+
+
 
 
 }
