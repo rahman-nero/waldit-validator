@@ -5,21 +5,31 @@ use Waldit\Validator\Exception\NotExistsValidatorMethodException;
 use Waldit\Validator\WalditFactory;
 
 require_once 'vendor/autoload.php';
-
 $waldit = (new WalditFactory())->make();
 
 $rules = [
-    'title' => 'min:3|string|length:8'
+    'title' => 'min:3'
 ];
-
-$waldit->setRules($rules);
 
 $data = [
-  'title' => "Ну22222"
+    'title' => "у"
 ];
 
+$messages = [
+    'title' => 'Да черт, у вас там все сгорело'
+];
+
+
+$waldit->setRules($rules);
+//$waldit->setMessages($messages);
+
 try {
-    $waldit->validate($data);
+    if ($waldit->validate($data)) {
+        echo 'Все прошло успешно';
+    } else {
+        dd($waldit->getErrors());
+    }
+
 } catch (NotExistsValidatorMethodException $e) {
     echo $e->getMethodName();
 }

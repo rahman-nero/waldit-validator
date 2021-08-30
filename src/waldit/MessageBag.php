@@ -6,11 +6,11 @@ namespace Waldit\Validator;
 
 use Waldit\Validator\Contracts\LanguageInterface;
 use Waldit\Validator\Exception\MessageNotFoundException;
-use Waldit\Validator\Exception\OverWriteMessageException;
 
 final class MessageBag
 {
     private array $messages = [];
+    private array $bagErrors = [];
     private LanguageInterface $language;
 
     public function __construct(LanguageInterface $language)
@@ -30,6 +30,18 @@ final class MessageBag
             throw new MessageNotFoundException();
         }
         return $this->messages[$key];
+    }
+
+    public function setError($elem, $ruleName)
+    {
+        if (!array_key_exists($elem, $this->bagErrors)) {
+            $this->bagErrors[$elem] = $this->getMessage($ruleName);
+        }
+    }
+
+    public function getBagErrors(): array
+    {
+        return $this->bagErrors;
     }
 
     private function fillMessages()

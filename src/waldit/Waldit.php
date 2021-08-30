@@ -22,7 +22,7 @@ final class Waldit
         $this->language = $language;
     }
 
-    public function validate($data)
+    public function validate($data): bool
     {
         foreach ($data as $inputName => $valueInput) {
             # Проверка есть ли такое правило
@@ -37,15 +37,16 @@ final class Waldit
 
                 # Вызываем метод для обработки, с передачей правила
                 if(!$this->callValidateMethod($parsedRule, $valueInput)) {
-                    return;
+                    return false;
                 }
             }
         }
 
+        return true;
     }
 
     public function getErrors() {
-        $this->messageBag->getMessages();
+        return $this->messageBag->getBagErrors();
     }
 
     protected function recursiveParse(string $rule): array
@@ -101,10 +102,7 @@ final class Waldit
         }
 
         if($result === false) {
-            $this->messageBag->setMessage(
-                $this->currentElemValidation,
-                $this->messageBag->getMessage('min')
-            );
+            $this->messageBag->setError($this->currentElemValidation, 'min');
             return false;
         }
 
@@ -147,8 +145,5 @@ final class Waldit
     {
         return $this->language;
     }
-
-
-
 
 }

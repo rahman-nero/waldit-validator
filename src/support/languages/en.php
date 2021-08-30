@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'asd' => 'asd'
+    'min' => 'asd'
 ];
