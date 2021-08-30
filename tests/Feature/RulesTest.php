@@ -3,6 +3,7 @@
 namespace Feature;
 
 use PHPUnit\Framework\TestCase;
+use Waldit\Validator\Exception\NotExistsValidatorMethodException;
 use Waldit\Validator\Waldit;
 use Waldit\Validator\WalditFactory;
 
@@ -45,6 +46,19 @@ final class RulesTest extends TestCase
         $this->walditObj->setRules($rules);
 
         $this->assertFalse($this->walditObj->hasRule('asb'));
+    }
+
+    public function testNoExistsRuleHandling()
+    {
+        $this->expectException(NotExistsValidatorMethodException::class);
+        $data = [
+            'name' => 'asdasd',
+        ];
+        $rules = [
+            'name' => "hehe_e_boy",
+        ];
+        $this->walditObj->setRules($rules);
+        $this->walditObj->validate($data);
     }
 
     public function rulesDataProvider()
