@@ -22,7 +22,6 @@ $messages = [
 $waldit->setRules($rules);
 $waldit->setMessages($messages);
 
-
 try {
 
     if ($waldit->validate($data)) {

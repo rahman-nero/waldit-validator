@@ -14,8 +14,8 @@ final class Waldit
     private MessageBag $messageBag;
 
     private array $rules;
-    private bool $stopOnFirstError;
-    private $currentElemValidation;
+    private bool $stopOnFirstError = true;
+    private string $currentRule;
 
 
     public function __construct(MessageBag $messageBag, LanguageInterface $language)
@@ -28,12 +28,13 @@ final class Waldit
     {
         # Перебираем все правила
         foreach ($this->rules as $ruleName => $ruleValue) {
-            $this->currentElemValidation = $ruleName;
+            $this->currentRule = $ruleName;
 
             $parsedRule = $this->recursiveParse($ruleValue);
+            $valueForValidate = $data[$ruleName] ?? null;
 
             # Вызываем метод для обработки, с передачей правил
-            if (!$this->callValidateMethod($parsedRule, $data[$ruleName] ?? null)) {
+            if (!$this->callValidateMethod($parsedRule, $valueForValidate)) {
                 return false;
             }
 
@@ -44,8 +45,10 @@ final class Waldit
 
     private function requiredValidate($value): bool
     {
+        $ruleName = sprintf("%s.required", $this->currentRule);
+
         if ($value === null) {
-            $this->messageBag->setError($this->currentElemValidation, 'required');
+            $this->messageBag->setError($ruleName, 'required');
             return false;
         }
         return true;
@@ -118,7 +121,7 @@ final class Waldit
                 $result = $this->{$method}($value);
             }
 
-            if (!$result) {
+            if ($this->stopOnFirstError === true && !$result) {
                 return false;
             }
         }
@@ -128,6 +131,8 @@ final class Waldit
 
     private function minValidate($value, $count): bool
     {
+        $ruleName = sprintf("%s.required", $this->currentRule);
+
         if (is_string($value)) {
             $result = mb_strlen($value) > $count;
         }
@@ -137,7 +142,7 @@ final class Waldit
         }
 
         if ($value === null || $result === false) {
-            $this->messageBag->setError($this->currentElemValidation, 'min');
+            $this->messageBag->setError($ruleName, 'min');
             return false;
         }
 
