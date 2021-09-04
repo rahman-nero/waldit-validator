@@ -26,26 +26,31 @@ final class Waldit
 
     public function validate($data): bool
     {
-        foreach ($data as $inputName => $valueInput) {
-            # Проверка есть ли такое правило
-            if (!$this->hasRule($inputName)) continue;
-            # Перебираем правила и применяем по очередной
-            foreach ($this->rules as $ruleName => $ruleValue) {
-                # Сперва парсим правило
-                $parsedRule = $this->recursiveParse($ruleValue);
+        # Перебираем все правила
+        foreach ($this->rules as $ruleName => $ruleValue) {
+            $this->currentElemValidation = $ruleName;
 
-                # Указываем какое правило обрабатываем на данный момент
-                $this->currentElemValidation = $ruleName;
+            $parsedRule = $this->recursiveParse($ruleValue);
 
-                # Вызываем метод для обработки, с передачей правила
-                if (!$this->callValidateMethod($parsedRule, $valueInput)) {
-                    return false;
-                }
+            # Вызываем метод для обработки, с передачей правил
+            if (!$this->callValidateMethod($parsedRule, $data[$ruleName] ?? null)) {
+                return false;
             }
+
         }
 
         return true;
     }
+
+    private function requiredValidate($value): bool
+    {
+        if ($value === null) {
+            $this->messageBag->setError($this->currentElemValidation, 'required');
+            return false;
+        }
+        return true;
+    }
+
 
     public function getErrors()
     {
@@ -54,16 +59,24 @@ final class Waldit
 
     protected function recursiveParse($rule): array
     {
+        # Если передан объект класса, то делегируем работу к другому материалу
         if (is_object($rule)) {
-            return $this->parseObjectRule($rule);
+            $parsedRule = $this->parseObjectRule($rule);
         }
 
+        if (is_string($rule)) {
+            $parsedRule = $this->parseTextRule($rule);
+        }
+
+        return $parsedRule;
+    }
+
+    private function parseTextRule(string $rule): array
+    {
         # Разделяем правила: "required|min:3|max:4" и т.д
         $explodedRule = explode('|', $rule);
 
         $parsedRule = array_map(function ($elem) {
-
-
             $result = preg_match_all("#^(.*):(.*)$#i", $elem, $matches);
 
             if ($result === 1) {
@@ -93,7 +106,6 @@ final class Waldit
     private function callValidateMethod(array $parsedRules, $value)
     {
         foreach ($parsedRules as $parsedElem) {
-
             $method = sprintf("%sValidate", $parsedElem['method']);
             $params = $parsedElem['params'];
             if (!method_exists($this, $method)) {
@@ -101,12 +113,17 @@ final class Waldit
             }
 
             if (!is_null($params)) {
-                return $this->{$method}($value, ...$params);
+                $result = $this->{$method}($value, ...$params);
+            } else if (is_null($params)) {
+                $result = $this->{$method}($value);
             }
 
-            return $this->{$method}($value);
+            if (!$result) {
+                return false;
+            }
         }
 
+        return true;
     }
 
     private function minValidate($value, $count): bool
@@ -119,7 +136,7 @@ final class Waldit
             $result = $value > $count;
         }
 
-        if ($result === false) {
+        if ($value === null || $result === false) {
             $this->messageBag->setError($this->currentElemValidation, 'min');
             return false;
         }

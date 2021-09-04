@@ -33,7 +33,6 @@ class MessageBagTest extends TestCase
     }
 
 
-
     public function messagesProvider() {
         return [
             ['name', 'Delete your code'],

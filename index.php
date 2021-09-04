@@ -8,22 +8,23 @@ require_once 'vendor/autoload.php';
 $waldit = (new WalditFactory())->make();
 
 $rules = [
-    'title' => 'min:3'
+    'title' => 'required|min:3',
 ];
 
 $data = [
-    'title' => "asdasdу"
 ];
 
 $messages = [
-    'title' => 'Да черт, у вас там все сгорело'
+    'title.min' => 'Минимальное значение в поле должно быть 3 символа',
 ];
 
 
 $waldit->setRules($rules);
-//$waldit->setMessages($messages);
+$waldit->setMessages($messages);
+
 
 try {
+
     if ($waldit->validate($data)) {
         echo 'Все прошло успешно';
     } else {

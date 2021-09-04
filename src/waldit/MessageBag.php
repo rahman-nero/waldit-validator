@@ -11,12 +11,15 @@ final class MessageBag
 {
     private array $messages = [];
     private array $bagErrors = [];
-    private LanguageInterface $language;
 
     public function __construct(LanguageInterface $language)
     {
-        $this->language = $language;
-        $this->fillMessages();
+        $this->fillMessages($language);
+    }
+
+    public function hasMessage(string $key): bool
+    {
+        return array_key_exists($key, $this->messages);
     }
 
     public function setMessage($key, $value)
@@ -35,7 +38,14 @@ final class MessageBag
     public function setError($elem, $ruleName)
     {
         if (!array_key_exists($elem, $this->bagErrors)) {
-            $this->bagErrors[$elem] = $this->getMessage($ruleName);
+            $message = sprintf("%s.%s", $elem, $ruleName);
+
+            if ($this->hasMessage($message)) {
+                $this->bagErrors[$elem] = $this->getMessage($message);
+            } else {
+                $this->bagErrors[$elem] = $this->getMessage($ruleName);
+            }
+
         }
     }
 
@@ -44,9 +54,10 @@ final class MessageBag
         return $this->bagErrors;
     }
 
-    private function fillMessages()
+
+    private function fillMessages(LanguageInterface $language)
     {
-        foreach ($this->language->getLanguageList() as $messageKey => $messageValue) {
+        foreach ($language->getLanguageList() as $messageKey => $messageValue) {
             $this->setMessage($messageKey, $messageValue);
         }
     }

@@ -1,5 +1,6 @@
 <?php
 
 return [
-    'min' => 'asd'
+    'min' => 'asd',
+    'required' => 'This fields is empty'
 ];

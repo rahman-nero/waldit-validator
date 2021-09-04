@@ -10,9 +10,9 @@ use Waldit\Validator\Exception\LanguageNotFoundException;
 
 final class Language implements LanguageInterface
 {
+    private string $default_language_autoload_path;
     private string $currentLanguageName;
     private array  $loadedLanguage = [];
-    private string $default_language_autoload_path;
 
     public function __construct(string $language = 'en', string $default_language_autoload_path = "/support/languages")
     {
@@ -50,6 +50,7 @@ final class Language implements LanguageInterface
         }
 
         $this->loadedLanguage = $downloadedArray;
+
         return true;
     }
 
