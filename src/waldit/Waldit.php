@@ -103,22 +103,36 @@ final class Waldit
         if (!($rule instanceof RuleInterface)) {
             throw new InvalidRuleException();
         }
-        return [];
+
+        return [
+            ['class' => $rule, 'method' => 'process']
+        ];
     }
 
     private function callValidateMethod(array $parsedRules, $value)
     {
         foreach ($parsedRules as $parsedElem) {
-            $method = sprintf("%sValidate", $parsedElem['method']);
-            $params = $parsedElem['params'];
-            if (!method_exists($this, $method)) {
-                throw new NotExistsValidatorMethodException($method);
+
+            if (array_key_exists('class', $parsedElem)) {
+                $obj = $parsedElem['class'];
+                $result = $obj->{$parsedElem['method']}($value);
+                if (!$result) {
+                    $this->messageBag->setError($this->currentRule, 'class');
+                }
             }
 
-            if (!is_null($params)) {
-                $result = $this->{$method}($value, ...$params);
-            } else if (is_null($params)) {
-                $result = $this->{$method}($value);
+            if (!array_key_exists('class', $parsedElem)) {
+                $method = sprintf("%sValidate", $parsedElem['method']);
+                $params = $parsedElem['params'];
+                if (!method_exists($this, $method)) {
+                    throw new NotExistsValidatorMethodException($method);
+                }
+
+                if (!is_null($params)) {
+                    $result = $this->{$method}($value, ...$params);
+                } else if (is_null($params)) {
+                    $result = $this->{$method}($value);
+                }
             }
 
             if ($this->stopOnFirstError === true && !$result) {

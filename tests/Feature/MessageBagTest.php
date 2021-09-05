@@ -13,7 +13,6 @@ class MessageBagTest extends TestCase
 
     public function setUp(): void
     {
-
         $language = $this->createMock(LanguageInterface::class);
 
         $language->method('getLanguageList')
@@ -25,6 +24,8 @@ class MessageBagTest extends TestCase
         $language->setLanguage('en');
         $this->messageBag = new MessageBag($language);
     }
+
+
 
     /**
      * @dataProvider messagesProvider

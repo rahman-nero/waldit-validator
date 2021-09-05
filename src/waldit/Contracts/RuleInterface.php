@@ -6,5 +6,5 @@ namespace Waldit\Validator\Contracts;
 
 interface RuleInterface
 {
-    public function process($rule, $value, $parameters);
+    public function process($value): bool;
 }

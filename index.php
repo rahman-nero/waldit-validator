@@ -5,10 +5,10 @@ use Waldit\Validator\Exception\NotExistsValidatorMethodException;
 use Waldit\Validator\WalditFactory;
 
 require_once 'vendor/autoload.php';
-$waldit = (new WalditFactory())->make();
+$waldit = (new WalditFactory())->make([], 'en', true);
 
 $rules = [
-    'title' => 'required|min:3',
+    'title' => (new \Rules\IpValidate),
 ];
 
 $data = [
@@ -16,6 +16,7 @@ $data = [
 
 $messages = [
     'title.min' => 'Минимальное значение в поле должно быть 3 символа',
+    'title.class' => 'У тебя не прошел класс',
 ];
 
 

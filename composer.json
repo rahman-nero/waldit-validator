@@ -11,7 +11,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Waldit\\Validator\\" : "src/waldit"
+            "Waldit\\Validator\\" : "src/waldit",
+            "Rules\\" : "rules/"
         }
     },
     "autoload-dev": {
@@ -26,3 +27,4 @@
         "test" : "vendor/bin/phpunit"
     }
 }
+
